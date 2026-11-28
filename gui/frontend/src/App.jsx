@@ -28,6 +28,7 @@ import StorageOffer from './components/StorageOffer'
 import { aboutLinks, PROJECT_REPO } from './aboutBrand'
 import { holdEta, finishAt } from './etaHold'
 import { runsOfSet, shortRunError } from './runsOfSet'
+import { historyKey, findHistory } from './historyKey'
 import defaultIcon from './assets/default-icon.svg'
 
 // Translation key for each About page link (aboutLinks in aboutBrand.js).
@@ -884,7 +885,7 @@ function App() {
     }
   }
   const [jobHistory, setJobHistory] = useState([])
-  const [selectedHistoryId, setSelectedHistoryId] = useState(null) // Reports page: which run's detail is shown
+  const [selectedHistoryId, setSelectedHistoryId] = useState(null) // Reports page: historyKey of the run whose detail is shown
   const [messageLog, setMessageLog] = useState([])
   // View Full Logs: what to open there when a report or message asks for its
   // log ({folder, name, around, notice, nonce}).
@@ -5735,7 +5736,7 @@ function App() {
                                       <a
                                         href="#"
                                         style={{flexShrink: 0, whiteSpace: 'nowrap'}}
-                                        onClick={(e) => { e.preventDefault(); setSelectedHistoryId(last.id); setActiveTab('reports') }}
+                                        onClick={(e) => { e.preventDefault(); setSelectedHistoryId(historyKey(last)); setActiveTab('reports') }}
                                       >
                                         {tl('viewThisRun', 'View this run')}
                                       </a>
@@ -7570,11 +7571,11 @@ function App() {
               <div style={{flex: '0 0 320px', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden'}}>
                 <div style={{maxHeight: '560px', overflowY: 'auto'}}>
                   {jobHistory.map((job, idx) => {
-                    const isSelected = (selectedHistoryId ?? jobHistory[0].id) === job.id
+                    const isSelected = findHistory(jobHistory, selectedHistoryId) === job
                     return (
                       <div
-                        key={job.id}
-                        onClick={() => setSelectedHistoryId(job.id)}
+                        key={historyKey(job)}
+                        onClick={() => setSelectedHistoryId(historyKey(job))}
                         style={{
                           padding: '12px 14px', cursor: 'pointer',
                           borderTop: idx === 0 ? 'none' : '1px solid #e2e8f0',
@@ -7606,7 +7607,7 @@ function App() {
 
               <div style={{flex: '1 1 auto'}}>
                 {(() => {
-                  const selected = jobHistory.find(j => j.id === selectedHistoryId) || jobHistory[0]
+                  const selected = findHistory(jobHistory, selectedHistoryId)
                   if (!selected) return <p style={{color: '#718096'}}>{t('reportsSelectPrompt')}</p>
                   return (
                     <div className="card">

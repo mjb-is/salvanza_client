@@ -810,7 +810,8 @@ func (a *App) appendJobHistory(entry JobHistory) error {
 		return fmt.Errorf("failed to load job history (refusing to overwrite): %w", err)
 	}
 
-	// Add new entry at the beginning
+	// Add new entry at the beginning, with an ID no other entry has (#173).
+	entry.ID = uniqueHistoryID(entry.ID, history)
 	history = append([]JobHistory{entry}, history...)
 
 	// Keep only last 50 entries
